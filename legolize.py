@@ -1,4 +1,5 @@
 import bpy
+import bmesh
 from typing import List
 
 bl_info = {
@@ -71,53 +72,137 @@ def legolize(num_layers: int, layers: List[LayerSettingsItem]) -> None:
     geom_node_mod = create_geometry_nodes_modifier(obj, layers)
 
 
+def create_brick():
+    brick = bpy.ops.mesh.primitive_cube_add(size=0.8, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
+    bpy.context.object.name = "Brick"
+    bpy.ops.object.editmode_toggle()
+    bpy.ops.transform.translate(value=(0, 0, 0.4), orient_type='GLOBAL',
+                                orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL',
+                                constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False,
+                                proportional_edit_falloff='SMOOTH', proportional_size=1,
+                                use_proportional_connected=False, use_proportional_projected=False, snap=False,
+                                snap_elements={'INCREMENT'}, use_snap_project=False, snap_target='CLOSEST',
+                                use_snap_self=True, use_snap_edit=True, use_snap_nonedit=True,
+                                use_snap_selectable=False)
 
-
-    # TODO: Use num_layers and layers to create the legolized effect
+    bpy.ops.mesh.select_mode(type="FACE")
+    bpy.ops.mesh.select_all(action='DESELECT')
+    obj_data = bpy.context.object.data
+    bm = bmesh.from_edit_mesh(obj_data)
+    bm.faces.ensure_lookup_table()
+    # Select and delete bottom face
+    bm.faces[4].select = True  # select index 4
+    bpy.ops.mesh.delete(type='FACE')
+    bm.faces.ensure_lookup_table()
+    # Select top face and move it
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bm.faces[4].select = True  # select index 4
+    bpy.ops.transform.translate(value=(0, 0, 0.16))
+    # Inset the top face
+    bpy.ops.mesh.inset(thickness=0.16, depth=0)
+    # Extrude the selected face
+    bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value": (0, 0, 0.16)})
+    bm.faces.ensure_lookup_table()
+    bpy.ops.mesh.select_all(action='DESELECT')
+    # Switch to edge editing mode
+    bpy.ops.mesh.select_mode(type="EDGE")
+    bm.edges.ensure_lookup_table()
+    # select the side edges of the new extrusion - four edges starting from a specific index
+    start_index = 24  # Starting index
+    # Create a list of edges to select
+    edges_to_select = [bm.edges[start_index + i] for i in range(4) if start_index + i < len(bm.edges)]
+    # Select all edges in the list
+    for edge in edges_to_select:
+        edge.select_set(True)
+    # bevel
+    bpy.ops.mesh.bevel(offset=0.428778, offset_pct=0, segments=3, affect='EDGES', clamp_overlap=True)
+    bpy.ops.mesh.select_all(action='DESELECT')
+    # Switch to vertex edit mode
+    bpy.ops.mesh.select_mode(type="VERT")
+    bpy.ops.mesh.select_all(action='SELECT')
+    # merge by distance
+    bpy.ops.mesh.remove_doubles(threshold=0.01)
+    bpy.ops.mesh.select_all(action='DESELECT')
+    # Update the mesh to reflect the changes
+    bmesh.update_edit_mesh(obj_data)
+    # back to object mode
+    bpy.ops.object.editmode_toggle()
+    # Apply modest bevel modifier
+    bpy.ops.object.modifier_add(type='BEVEL')
+    bpy.context.object.modifiers["Bevel"].width = 0.01
+    # Bake in the modifier by converting to mesh
+    bpy.ops.object.convert(target='MESH')
+    # Apply smoothing by angle (~36 degrees)
+    bpy.ops.object.shade_smooth_by_angle(angle=0.628319)
+    # Create a new material
+    material = bpy.data.materials.new(name="Brick_material")
+    material.use_nodes = True
+    node_tree = material.node_tree
+    # Clear default nodes
+    node_tree.nodes.clear()
+    # Create Principled BSDF node
+    principled_node = node_tree.nodes.new(type='ShaderNodeBsdfPrincipled')
+    principled_node.inputs['Roughness'].default_value = 0.25
+    principled_node.inputs['Base Color'].default_value = (0.0, 0.0, 1.0, 1.0)
+    # Create Output node
+    output_node = node_tree.nodes.new(type='ShaderNodeOutputMaterial')
+    # Link Principled BSDF to Output
+    node_tree.links.new(principled_node.outputs['BSDF'], output_node.inputs['Surface'])
+    # Assign the material to the object
+    bpy.context.object.data.materials.clear()
+    bpy.context.object.data.materials.append(material)
+    # hide the object
+    bpy.context.object.hide_set(True)
+    bpy.context.object.hide_render = True
+    # -- finally, exit edit mode back to object mode
+    # bpy.ops.object.editmode_toggle()
 
 
 def create_geometry_nodes_modifier(obj, layers):
+    #//= Shout-out to Brendan Parmer for https://github.com/BrendanParmer/NodeToPython =\\#
     modifier = obj.modifiers.new(name="LegolizeGeometry", type='NODES')
-    node_group = bpy.data.node_groups.new(name="LegolizeNodes", type='GeometryNodeTree')
-    modifier.node_group = node_group
 
     # Get the number of levels from the layers collection
     num_levels = len(layers)
 
-    # Add input and output nodes
-    input_node = node_group.nodes.new('NodeGroupInput')
-    output_node = node_group.nodes.new('NodeGroupOutput')
+    legolizenodes = bpy.data.node_groups.new(type='GeometryNodeTree', name="LegolizeNodes")
 
-    # Ensure the group has input and output sockets
-    if hasattr(node_group, 'interface'):
-        # Blender 3.0+
-        node_group.interface.new_socket(name="Geometry", in_out='INPUT', socket_type='NodeSocketGeometry')
-        node_group.interface.new_socket(name="Geometry", in_out='OUTPUT', socket_type='NodeSocketGeometry')
-    else:
-        # Older Blender versions
-        node_group.inputs.new('NodeSocketGeometry', "Geometry")
-        node_group.outputs.new('NodeSocketGeometry', "Geometry")
+    modifier.node_group = legolizenodes
+    # initialize legolizenodes nodes
+    # legolizenodes interface
+    # Socket Geometry
+    geometry_socket = legolizenodes.interface.new_socket(name="Geometry", in_out='OUTPUT',
+                                                         socket_type='NodeSocketGeometry')
+    geometry_socket.attribute_domain = 'POINT'
 
-    # Add a Grid node to create bricks
-    grid_node = node_group.nodes.new('GeometryNodeMeshGrid')
-    grid_node.inputs['Size X'].default_value = 0.2  # Brick width
-    grid_node.inputs['Size Y'].default_value = 0.1  # Brick height
-    grid_node.inputs['Vertices X'].default_value = 10  # Number of bricks in X
-    grid_node.inputs['Vertices Y'].default_value = num_levels  # Number of levels
+    # Socket Geometry
+    geometry_socket_1 = legolizenodes.interface.new_socket(name="Geometry", in_out='INPUT',
+                                                           socket_type='NodeSocketGeometry')
+    geometry_socket_1.attribute_domain = 'POINT'
 
-    # Add a Transform node to position the bricks
-    transform_node = node_group.nodes.new('GeometryNodeTransform')
+    # node Original Geom Input
+    original_geom_input = legolizenodes.nodes.new("NodeGroupInput")
+    original_geom_input.label = "Original"
+    original_geom_input.name = "Original Geom Input"
 
-    # Add a Join Geometry node to combine the grid with the input geometry
-    join_node = node_group.nodes.new('GeometryNodeJoinGeometry')
+    # node Final Geom Output
+    final_geom_output = legolizenodes.nodes.new("NodeGroupOutput")
+    final_geom_output.label = "Final"
+    final_geom_output.name = "Final Geom Output"
+    final_geom_output.is_active_output = True
 
-    # Connect nodes
-    node_group.links.new(input_node.outputs['Geometry'], join_node.inputs[0])
-    node_group.links.new(grid_node.outputs[0], transform_node.inputs[0])
-    node_group.links.new(transform_node.outputs[0], join_node.inputs[0])
-    node_group.links.new(join_node.outputs[0], output_node.inputs['Geometry'])
+    # Set locations
+    original_geom_input.location = (56.812530517578125, 195.66940307617188)
+    final_geom_output.location = (326.6611328125, 198.056640625)
 
-    return modifier
+    # Set dimensions
+    original_geom_input.width, original_geom_input.height = 140.0, 100.0
+    final_geom_output.width, final_geom_output.height = 140.0, 100.0
+
+    # initialize legolizenodes links
+    # original_geom_input.Geometry -> final_geom_output.Geometry
+    legolizenodes.links.new(original_geom_input.outputs[0], final_geom_output.inputs[0])
+    return legolizenodes
 
 class VIEW3D_PT_legolize_panel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
@@ -147,6 +232,7 @@ class LEGOLIZE_OT_Apply(bpy.types.Operator):
     def execute(self, context):
         settings = context.scene.legolize_settings
         try:
+            create_brick()
             legolize(settings.num_layers, list(settings.layers))
             self.report({'INFO'}, f"Successfully legolized with {settings.num_layers} layers")
         except Exception as e:
