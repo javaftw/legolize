@@ -101,7 +101,7 @@ def create_terrain(strength=1.0, brickscale=0.02, use_full_size_brick=False):
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.select_all(action='SELECT')
     bpy.ops.mesh.subdivide(number_cuts=10)
-    bpy.ops.mesh.subdivide(number_cuts=5)
+    bpy.ops.mesh.subdivide(number_cuts=6)
 
     # Ensure UV map exists
     bpy.ops.mesh.uv_texture_add()
