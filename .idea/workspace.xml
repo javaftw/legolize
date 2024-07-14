@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f4686c71-83ed-47b2-a6fe-4366bff1306d" name="Changes" comment="Consolidated functionality into single script">
+    <list default="true" id="f4686c71-83ed-47b2-a6fe-4366bff1306d" name="Changes" comment="Adds geometry nodes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/legolize.py" beforeDir="false" afterPath="$PROJECT_DIR$/legolize.py" afterDir="false" />
     </list>
@@ -85,13 +85,30 @@
       <option name="project" value="LOCAL" />
       <updated>1720904296988</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Adds geometry nodes">
+      <option name="closed" value="true" />
+      <created>1720910912694</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1720910912694</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Adds geometry nodes">
+      <option name="closed" value="true" />
+      <created>1720910925590</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1720910925590</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial commit" />
     <MESSAGE value="Adds geometry node modifier after converting displaced obj to mesh" />
     <MESSAGE value="Consolidated functionality into single script" />
-    <option name="LAST_COMMIT_MESSAGE" value="Consolidated functionality into single script" />
+    <MESSAGE value="Adds geometry nodes" />
+    <option name="LAST_COMMIT_MESSAGE" value="Adds geometry nodes" />
   </component>
 </project>
