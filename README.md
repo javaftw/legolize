@@ -19,6 +19,7 @@ Transform Terrain into Bricks
 2. Download the `legolize.py` file to your installation directory.
 
 3. In Blender:
+   - Open Blender, select and delete the default cube.
    - Go to the Scripting workspace.
    - Load and run the `legolize.py` file.
    - Switch back to the Modeling or Layout workspace.
