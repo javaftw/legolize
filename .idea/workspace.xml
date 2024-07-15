@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f4686c71-83ed-47b2-a6fe-4366bff1306d" name="Changes" comment="Added README.md">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -156,7 +156,39 @@
       <option name="project" value="LOCAL" />
       <updated>1721002868993</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Added README.md">
+      <option name="closed" value="true" />
+      <created>1721003192401</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1721003192401</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Added README.md">
+      <option name="closed" value="true" />
+      <created>1721005827153</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1721005827153</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Added README.md">
+      <option name="closed" value="true" />
+      <created>1721007310396</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1721007310396</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Added README.md">
+      <option name="closed" value="true" />
+      <created>1721022270682</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1721022270682</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
