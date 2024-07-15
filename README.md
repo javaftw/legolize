@@ -4,7 +4,7 @@
 
 Transform Terrain into Bricks
 
-**legolize** is a Blender add-on that converts QGIS-exported terrain data into a stylized brick landscape, bridging GIS data with 3D visualization.
+**legolize** is a Blender add-on that converts QGIS-exported terrain data into a stylized brick landscape.
 
 ## Installation and Usage
 
